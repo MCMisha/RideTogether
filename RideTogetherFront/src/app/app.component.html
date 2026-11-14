@@ -1,0 +1,164 @@
+<header class="site-header">
+  <div class="site-header__inner">
+    <span class="brand"><span class="brand__icon" aria-hidden="true">↗</span> RideTogether</span>
+    @if (user(); as currentUser) {
+      <div class="account">
+        <span>{{ currentUser.firstName }} {{ currentUser.lastName }}</span>
+        <button type="button" class="button button--quiet"
+          [disabled]="signingOut() || saving()" (click)="logout()">
+          {{ signingOut() ? 'Signing out…' : 'Sign out' }}
+        </button>
+      </div>
+    }
+  </div>
+</header>
+
+<main class="page">
+  <header class="page-heading">
+    <h1>Shared rides</h1>
+    <p>Find a ride or offer seats in your car.</p>
+  </header>
+
+  @if (logoutError()) {
+    <p class="notice notice--error" role="alert">{{ logoutError() }}</p>
+  }
+
+  @if (actionError()) {
+    <p class="notice notice--error" role="alert">{{ actionError() }}</p>
+  }
+
+  <div class="workspace">
+    <section class="rides" aria-labelledby="rides-heading">
+      <h2 id="rides-heading">{{ activeSearch() ? 'Search results' : 'Available rides' }}</h2>
+
+      <form class="form" [formGroup]="searchForm" (ngSubmit)="searchRides()">
+        <label for="ride-search">Search in English</label>
+        <input
+          id="ride-search"
+          type="search"
+          formControlName="query"
+          maxlength="250"
+          placeholder="Rides from Gdańsk to Sopot"
+        />
+        <div class="form-actions">
+          <button type="submit" class="button button--primary"
+            [disabled]="searchQuery.invalid || !searchQuery.value.trim() || saving()">
+            Search rides
+          </button>
+          @if (activeSearch() || searchQuery.value) {
+            <button type="button" class="button button--quiet"
+              [disabled]="saving()" (click)="clearSearch()">Clear search</button>
+          }
+        </div>
+      </form>
+
+      @if (loading()) {
+        <p class="notice" role="status">{{ activeSearch() ? 'Searching for rides…' : 'Loading rides…' }}</p>
+      } @else if (loadError()) {
+        <div class="notice notice--error">
+          <p role="alert">{{ loadError() }}</p>
+          <button type="button" class="button button--quiet" (click)="loadRides()">Try again</button>
+        </div>
+      } @else {
+        <div class="ride-list">
+          @for (ride of rides(); track ride.id) {
+            <article class="ride-card">
+              <div class="ride-card__heading">
+                <h3>{{ ride.departure }} <span class="route-arrow">→</span> {{ ride.destination }}</h3>
+                <span class="seats">Available seats: {{ ride.availableSeats }} / {{ ride.seats }}</span>
+              </div>
+
+              <dl class="ride-details">
+                <div>
+                  <dt>Departure</dt>
+                  <dd>{{ ride.startAt.replace('T', ' ').slice(0, 16) }}</dd>
+                </div>
+                <div>
+                  <dt>Travel time</dt>
+                  <dd>{{ ride.rideTime / 60 }} min</dd>
+                </div>
+                <div>
+                  <dt>Meeting point</dt>
+                  <dd>{{ ride.meetPlace }}</dd>
+                </div>
+              </dl>
+
+              @if (user() && user()?.id === ride.userId) {
+                <div class="ride-actions">
+                  <button type="button" class="button button--quiet"
+                    [disabled]="saving() || signingIn() || signingOut()"
+                    (click)="editRide(ride)">Edit</button>
+                  <button type="button" class="button button--danger"
+                    [disabled]="saving() || signingIn() || signingOut()"
+                    (click)="deleteRide(ride)">Delete</button>
+                </div>
+              } @else if (user()) {
+                <div class="ride-actions">
+                  @if (ride.isBookedByMe) {
+                    <span role="status">Booking confirmed</span>
+                  } @else if (ride.availableSeats <= 0) {
+                    <span>No seats available</span>
+                  } @else {
+                    <button type="button" class="button button--primary"
+                      [disabled]="saving() || signingIn() || signingOut()"
+                      (click)="bookRide(ride)">Book a seat</button>
+                  }
+                </div>
+              }
+              @if (bookingConflict(); as conflict) {
+                @if (conflict.rideId === ride.id) {
+                  <p class="notice notice--error" role="alert">{{ conflict.message }}</p>
+                }
+              }
+            </article>
+          } @empty {
+            <p class="notice" role="status">{{ activeSearch() ? 'No matching rides found.' : 'No rides found.' }}</p>
+          }
+        </div>
+      }
+    </section>
+
+    @if (user()) {
+      <section class="panel" aria-labelledby="ride-form-heading">
+        <h2 id="ride-form-heading">{{ editingId() === null ? 'Add ride' : 'Edit ride' }}</h2>
+        <form class="form" [formGroup]="form" (ngSubmit)="saveRide()">
+          <div class="field-pair">
+            <label>From <input formControlName="departure" placeholder="e.g. Gdańsk" /></label>
+            <label>To <input formControlName="destination" placeholder="e.g. Gdynia" /></label>
+          </div>
+          <label>Departure <input type="datetime-local" step="1" formControlName="startAt" /></label>
+          <label>Meeting point <input formControlName="meetPlace" placeholder="e.g. Gdańsk Main Station" /></label>
+          <div class="field-pair">
+            <label>Travel time (min) <input type="number" min="1" step="any" formControlName="rideMinutes" /></label>
+            <label>Total seats <input type="number" min="1" step="1" formControlName="seats" /></label>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="button button--primary"
+              [disabled]="form.invalid || saving() || signingIn() || signingOut() || loading()">
+              {{ saving() ? 'Saving…' : editingId() === null ? 'Add ride' : 'Save changes' }}
+            </button>
+            @if (editingId() !== null) {
+              <button type="button" class="button button--quiet" [disabled]="saving()"
+                (click)="cancelEdit()">Cancel</button>
+            }
+          </div>
+        </form>
+      </section>
+    } @else {
+      <section class="panel" aria-labelledby="login-heading">
+        <h2 id="login-heading">Sign in</h2>
+        <p class="panel__description">Sign in to book a seat or offer a ride.</p>
+        <form class="form" [formGroup]="loginForm" (ngSubmit)="login()">
+          <label>Username <input formControlName="username" autocomplete="username" /></label>
+          <label>Password <input type="password" formControlName="password" autocomplete="current-password" /></label>
+          <button type="submit" class="button button--primary" [disabled]="loginForm.invalid || signingIn()">
+            {{ signingIn() ? 'Signing in…' : 'Sign in' }}
+          </button>
+        </form>
+        @if (loginError()) {
+          <p class="notice notice--error" role="alert">{{ loginError() }}</p>
+        }
+      </section>
+    }
+  </div>
+</main>

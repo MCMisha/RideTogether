@@ -1,0 +1,168 @@
+:host {
+  --ink: #152636;
+  --muted: #506575;
+  --accent: #08665c;
+  --line: #dce6e8;
+  --surface: #fff;
+  display: block;
+  min-height: 100dvh;
+  color: var(--ink);
+  background: #f3f7f8;
+  font: 16px/1.5 Inter, system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+.site-header {
+  background: #122a3a;
+  color: white;
+}
+
+.site-header__inner, .page {
+  width: min(100% - 2rem, 72rem);
+  margin-inline: auto;
+}
+
+.site-header__inner, .account, .brand {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.site-header__inner {
+  min-height: 4.5rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding-block: .75rem;
+}
+
+.brand { font-size: 1.1rem; font-weight: 750; letter-spacing: -.025em; }
+
+.brand__icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: .55rem;
+  background: #baf3db;
+  color: #164d43;
+}
+
+.account { flex-wrap: wrap; font-size: .875rem; }
+
+.page { padding-block: clamp(2rem, 5vw, 4rem); }
+.page-heading { margin-bottom: clamp(1.5rem, 4vw, 3rem); }
+.page-heading p, .panel__description { margin: .5rem 0 0; color: var(--muted); }
+
+h1, h2, h3 { margin: 0; line-height: 1.2; overflow-wrap: anywhere; }
+h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); letter-spacing: -.055em; }
+h2 { font-size: 1.3rem; letter-spacing: -.025em; }
+h3 { font-size: clamp(1.15rem, 2.5vw, 1.45rem); letter-spacing: -.025em; }
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: start;
+}
+
+.ride-list, .form { display: grid; gap: .9rem; }
+.rides > h2 { margin-bottom: 1rem; }
+
+.ride-card, .panel, .notice {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--surface);
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.ride-card, .panel { box-shadow: 0 4px 15px rgb(18 42 58 / 5%); }
+.panel { border-top: 4px solid var(--accent); }
+
+.ride-card__heading, .ride-actions, .form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .55rem .8rem;
+}
+
+.ride-card__heading { justify-content: space-between; }
+.route-arrow { color: var(--accent); }
+.seats {
+  padding: .25rem .6rem;
+  border-radius: 999px;
+  color: #07584d;
+  background: #def4eb;
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+.ride-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem 1rem;
+  margin: 1rem 0 0;
+}
+
+.ride-details > div:last-child { grid-column: 1 / -1; }
+dt { color: var(--muted); font-size: .8rem; }
+dd { margin: .1rem 0 0; font-weight: 600; overflow-wrap: anywhere; }
+
+.ride-actions {
+  margin-top: 1rem;
+  padding-top: .85rem;
+  border-top: 1px solid var(--line);
+}
+
+.form { margin-top: 1.1rem; }
+.field-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+label { display: grid; gap: .3rem; min-width: 0; font-size: .875rem; font-weight: 650; }
+
+input {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: .55rem .65rem;
+  border: 1px solid #b8cbd0;
+  border-radius: .55rem;
+  background: #fbfdfe;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.button {
+  min-height: 2.5rem;
+  border: 1px solid transparent;
+  border-radius: .55rem;
+  padding: .5rem .85rem;
+  font: inherit;
+  font-size: .875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button--primary { background: var(--accent); color: white; }
+.button--primary:hover:not(:disabled) { background: #06584f; }
+.button--quiet { color: #1a4655; background: #edf4f6; border-color: #d7e5e9; }
+.button--quiet:hover:not(:disabled) { background: #deecef; }
+.button--danger { color: #9e2832; background: #fff0f1; }
+.button--danger:hover:not(:disabled) { background: #ffe0e4; }
+.button:disabled { opacity: .55; cursor: not-allowed; }
+input:focus-visible, .button:focus-visible { outline: 3px solid #168c7d; outline-offset: 2px; }
+.site-header .button:focus-visible { outline-color: #baf3db; }
+
+.notice { margin: 0 0 1rem; color: var(--muted); }
+.panel .notice { margin: 1rem 0 0; }
+.notice p { margin: 0 0 .75rem; }
+.notice--error { color: #8d2432; border-color: #efc1c8; background: #fff5f6; }
+
+@media (max-width: 48rem) {
+  .workspace { grid-template-columns: minmax(0, 1fr); }
+  .panel { grid-row: 1; }
+}
+
+@media (max-width: 23rem) {
+  .field-pair, .ride-details { grid-template-columns: minmax(0, 1fr); }
+}
